@@ -24,18 +24,25 @@ export default defineConfig(({ command }) => {
   ];
 
   if (command === "build") {
+    const isVercel = !!process.env.VERCEL;
+    const preset = process.env.NITRO_PRESET ?? (isVercel ? "vercel" : "cloudflare-module");
+
     plugins.push(
       nitro({
-        preset: process.env.NITRO_PRESET ?? "cloudflare-module",
-        output: {
-          dir: "dist",
-          serverDir: "dist/server",
-          publicDir: "dist/client",
-        },
-        cloudflare: {
-          nodeCompat: true,
-          deployConfig: true,
-        },
+        preset,
+        ...(preset === "cloudflare-module"
+          ? {
+              output: {
+                dir: "dist",
+                serverDir: "dist/server",
+                publicDir: "dist/client",
+              },
+              cloudflare: {
+                nodeCompat: true,
+                deployConfig: true,
+              },
+            }
+          : {}),
       }),
     );
   }
